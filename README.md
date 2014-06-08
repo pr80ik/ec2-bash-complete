@@ -13,10 +13,10 @@ Setup
     e.g. by copying to ~/bin/ directory
 
 3. add a cron job to generate the AWS EC2 instance description file in directory /var/aws-cli/cache/describe-instances.d/
-    e.g. 
-    ```mkdir -p /var/aws-cli/cache/describe-instances.d/
-    aws ec2 describe-instances --region us-east-1 --profile my-aws-profile > /var/aws-cli/cache/describe-instances.d/my-aws-ec2-instances.json
-    ```
+    e.g.```
+    mkdir -p /var/aws-cli/cache/describe-instances.d/
+    
+    aws ec2 describe-instances --region us-east-1 --profile my-aws-profile > /var/aws-cli/cache/describe-instances.d/my-aws-ec2-instances.json```
 
 4. copy the ssh_keys to ~/.ssh (or update the path in script ~/bin/ssh-ec2
 
