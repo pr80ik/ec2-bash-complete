@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#ssh-ec2 parameter-completion
+
+_aws_ec2_keywords ()
+{
+  local cur
+
+  COMPREPLY=()
+  cur=${COMP_WORDS[COMP_CWORD]}
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+  case "$cur" in
+    -*)
+    ;;
+
+    *)
+        EC2_KEYWORDS=$(ls-ec2-keywords.js)
+        COMPREPLY=( $( compgen -W "${EC2_KEYWORDS}" -- $cur) )
+    ;;
+  esac
+
+  return 0
+}
+
+complete -F _aws_ec2_keywords ssh-ec2
+#complete -F _ssh ssh-ec2
+
