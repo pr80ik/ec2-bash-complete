@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [[ "$@" == "" ]]; then
+  echo "usage: ssh-ec2 <hostname | instance-id | Name-Tag>" >&2
+  exit 1
+fi
+
+HOSTNAME=$(ls-ec2-keywords.js ${1})
+if [ "$HOSTNAME" == "" ] || [ "$HOSTNAME" == "undefined" ]; then
+    echo "hostname not valid $HOSTNAME" >&2
+    exit 1
+fi
+
+SSH_KEY=$(ls-ec2-keywords.js --get-ssh-key ${HOSTNAME})
+if [ "$SSH_KEY" == "" ] || [ "$SSH_KEY" == "undefined" ]; then
+    echo "ssh key not valid $SSH_KEY" >&2
+    exit 2
+fi
+
+ssh -A -i ~/.ssh/${SSH_KEY} ${HOSTNAME}
