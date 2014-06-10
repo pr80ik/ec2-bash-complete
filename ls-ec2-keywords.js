@@ -113,7 +113,7 @@ var findMatchingInstance = function(keyword, instances){
 
 		return instance.Tags.map(function(tag){
 			if(tag.Key === 'Name' && 
-					tag.Value.replace(/\W/gi, '_').toLowerCase() === keyword){
+					tag.Value.replace(/\s/gi, '_').toLowerCase() === keyword){
 				return instance;
 			}
 		});
@@ -216,7 +216,7 @@ var collectKeywords = function(instances){
 	allKeywords = allKeywords.concat.apply(allKeywords, instances.map(function(instance){
 		var nameArr = instance.Tags.map(function(tag){
 			if(tag.Key === 'Name'){
-				return tag.Value.replace(/\W/gi, '_').toLowerCase();
+				return tag.Value.replace(/\s/gi, '_').toLowerCase();
 			}
 		});
 
