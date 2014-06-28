@@ -111,12 +111,14 @@ var findMatchingInstance = function(keyword, instances){
 			return instance;
 		}
 
-		return instance.Tags.map(function(tag){
-			if(tag.Key === 'Name' && 
-					tag.Value.replace(/\s/gi, '_').toLowerCase() === keyword){
-				return instance;
-			}
-		});
+		if(!!instance && !!instance.Tags){
+            return instance.Tags.map(function(tag){
+			    if(tag.Key === 'Name' && 
+					    tag.Value.replace(/\s/gi, '_').toLowerCase() === keyword){
+				    return instance;
+			    }
+		    });
+        }
 	}));
 	
 	var instances = [];
@@ -214,11 +216,14 @@ var collectKeywords = function(instances){
 	var allKeywords = [];
 
 	allKeywords = allKeywords.concat.apply(allKeywords, instances.map(function(instance){
-		var nameArr = instance.Tags.map(function(tag){
-			if(tag.Key === 'Name'){
-				return tag.Value.replace(/\s/gi, '_').toLowerCase();
-			}
-		});
+		var nameArr = [];
+        if(!!instance && !!instance.Tags){
+            nameArr = instance.Tags.map(function(tag){
+			    if(tag.Key === 'Name'){
+				    return tag.Value.replace(/\s/gi, '_').toLowerCase();
+			    }
+		    });
+        }
 
 		var retval =  [];
 		if(!!instance.PublicIpAddress){
