@@ -24,5 +24,3 @@ _aws_ec2_keywords ()
 }
 
 complete -F _aws_ec2_keywords ssh-ec2
-#complete -F _ssh ssh-ec2
-
