@@ -2,6 +2,19 @@
 
 #ssh-ec2 parameter-completion
 
+_find_ec2_keywords ()
+{
+  echo $(cat /var/aws-cli/cache/describe-instances.d/ec2-desc.json \
+    | jq '[.name, .privateIpAddress, .privateDnsName, .instanceId]' \
+    | grep -v "\[" \
+    | grep -v "\]" \
+    | sed -e "s|,$||g" \
+    | sed -e "s| |_|g" \
+    | sed -e "s|^__| |g" \
+    | grep -v "null" \
+    | xargs echo)
+}
+
 _aws_ec2_keywords ()
 {
   local cur
@@ -15,7 +28,7 @@ _aws_ec2_keywords ()
     ;;
 
     *)
-        EC2_KEYWORDS=$(ls-ec2-keywords.js)
+        EC2_KEYWORDS=$(_find_ec2_keywords)
         COMPREPLY=( $( compgen -W "${EC2_KEYWORDS}" -- $cur) )
     ;;
   esac

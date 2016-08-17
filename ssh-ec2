@@ -1,20 +1,37 @@
 #!/bin/bash
 
-if [[ "$@" == "" ]]; then
-  echo "usage: ssh-ec2 <hostname | instance-id | Name-Tag>" >&2
-  exit 1
+set -euo pipefail
+IFS=$'\n\t'
+
+if [ "$#" -ne 1 ]; then
+    echo "usage: ssh-ec2 <hostname | instance-id | Name-Tag>" >&2
+    exit 1;
 fi
 
-HOSTNAME=$(ls-ec2-keywords.js ${1})
-if [ "$HOSTNAME" == "" ] || [ "$HOSTNAME" == "undefined" ]; then
-    echo "hostname not valid $HOSTNAME" >&2
-    exit 1
+_SEARCH_TERM=$(echo -n $1 | sed -e 's|_| |g')
+_EC2_HOSTNAME=$(cat /var/aws-cli/cache/describe-instances.d/ec2-desc.json | jq --arg NAME "${_SEARCH_TERM}" 'select(.["name"] == $NAME) | .privateDnsName' | xargs echo)
+
+if [ -z "${_EC2_HOSTNAME// }"  ]; then
+    #${_SEARCH_TERM} is not a 'Name' tag, check hostname
+    _EC2_HOSTNAME=$(cat /var/aws-cli/cache/describe-instances.d/ec2-desc.json | jq --arg NAME "${_SEARCH_TERM}" 'select(.privateDnsName == $NAME) | .privateDnsName' | xargs echo)
 fi
 
-SSH_KEY=$(ls-ec2-keywords.js --get-ssh-key ${HOSTNAME})
-if [ "$SSH_KEY" == "" ] || [ "$SSH_KEY" == "undefined" ]; then
-    echo "ssh key not valid $SSH_KEY" >&2
-    exit 2
+if [ -z "${_EC2_HOSTNAME// }"  ]; then
+    #${_SEARCH_TERM} is not a 'Name' tag or HostName, check IP-Address
+    _EC2_HOSTNAME=$(cat /var/aws-cli/cache/describe-instances.d/ec2-desc.json | jq --arg NAME "${_SEARCH_TERM}" 'select(.privateIpAddress == $NAME) | .privateDnsName' | xargs echo)
 fi
 
-ssh -A -i ~/.ssh/${SSH_KEY} ${HOSTNAME}
+if [ -z "${_EC2_HOSTNAME// }"  ]; then
+    #${_SEARCH_TERM} is not a 'Name' tag or HostName, check IP-Address
+    _EC2_HOSTNAME=$(cat /var/aws-cli/cache/describe-instances.d/ec2-desc.json | jq --arg NAME "${_SEARCH_TERM}" 'select(.instanceId == $NAME) | .privateDnsName' | xargs echo)
+fi
+
+if [ -z "${_EC2_HOSTNAME// }"  ]; then
+    #${_SEARCH_TERM} was not found! send an error
+	echo "Cannot find hostname for ${_SEARCH_TERM}" >&2
+	exit 2;
+fi
+
+echo -e "running command:: ssh ${_EC2_HOSTNAME}" >&2
+
+ssh ${_EC2_HOSTNAME}
